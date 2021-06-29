@@ -45,7 +45,9 @@ class AuthController extends Controller
 
     /**
      * @param Request $request
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|Response
+     * @return \Illuminate\Contracts\Foundation\Application
+     * @return \Illuminate\Contracts\Routing\ResponseFactory
+     * @return Response
      * check email
      * check password
      * get token this user
@@ -76,13 +78,14 @@ class AuthController extends Controller
         return response($response, 201);
     }
 
-
+    /**
+     * @param Request $request
+     * @return string[]
+     * выход с удалением token пользователя
+     */
     public function logout(Request $request)
     {
         auth()->user()->tokens()->delete();
-
-        return [
-            'message' => 'logged out'
-        ];
+        return ['message' => 'logged out'];
     }
 }
