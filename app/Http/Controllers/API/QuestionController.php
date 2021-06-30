@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\Controller;
 use App\Http\Requests\QuestionStoreRequest;
 use App\Http\Requests\QuestionUpdateRequest;
 use App\Mail\NewQuestionMail;
@@ -13,59 +12,42 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Mail;
 
-/**
- * @OA\Info(
- *     title="Question API swagger documentation",
- *     version="0.0.1",
- *     @OA\Contact(
- *          email="echo.zahar@gmail.com"
- *      ),
- *     @OA\License(
- *          name="Apache 2.0",
- *          url="http://www.apache.org/licenses/LICENSE-2.0.html"
- *      )
- * )
- * @OA\Server(
- *     url="127.0.0.1:8000/api/",
- *     description="Demo tech task API server"
- * )
- */
-class QuestionController extends Controller
+class QuestionController extends ApiController
 {
-
     /**
-     * Display a listing of the resource.
-     * @return Response
-     *
-     * @OA\Get(
-     *      path="/questions",
-     *      tags={"Questions"},
-     *      @OA\Parameter(
-     *         description="Question page use search",
-     *         name="search",
+     * @OA\Get (
+     *     path="/questions",
+     *     operationId="QuestionAll",
+     *     tags={"Questions"},
+     *     summary="Получение всех обращении с использоваение простой пагинаций, по 3 обращения (simplePaginate(3))",
+     *     @OA\Parameter (
+     *         description="Пагинация по страницам",
+     *         name="page",
      *         in="query",
-     *         @OA\Schema(
-     *             type="string",
-     *          )
-     *       ),
-     *      @OA\Response(
+     *         @OA\Schema (
+     *             type="integer",
+     *         )
+     *     ),
+     *      @OA\Response (
      *          response=403,
      *          description="Forbidden"
      *      ),
-     *      @OA\Response(
+     *      @OA\Response (
      *          response=404,
      *          description="not found"
      *      ),
-     *      @OA\Response(
+     *      @OA\Response (
      *          response="200",
      *          description="An example resource"
      *      ),
      * )
+     * Display a listing of the resource.
+     * @return Response
      */
     public function index(Request $request)
     {
 //        return $this->filter($request);
-        return Question::latest()->simplePaginate(10);
+        return Question::latest()->simplePaginate(2);
     }
 
     /**
@@ -292,6 +274,14 @@ class QuestionController extends Controller
     /**
      * @param string $name
      * @return Response
+     * @OA\Parameter (
+     *         description="Поиск по имени пользователя",
+     *         name="search",
+     *         in="query",
+     *         @OA\Schema(
+     *             type="string",
+     *          )
+     *       ),
      */
     public function search($name)
     {

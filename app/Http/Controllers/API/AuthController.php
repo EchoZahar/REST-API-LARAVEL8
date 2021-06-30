@@ -8,14 +8,6 @@ use App\Models\User;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 
-/**
- * Class AuthController
- * @package App\Http\Controllers\API*
- * @OA\Server(
- *     url="127.0.0.1:8000/api/",
- *     description="Demo tech task API server"
- * )
- */
 class AuthController extends Controller
 {
     /**
@@ -29,7 +21,7 @@ class AuthController extends Controller
      * @OA\Post(
      *      path="/register",
      *      operationId="RegisterNewUser",
-     *      tags={"Auth"},
+     *      tags={"Auth Api"},
      *      summary="Register new user",
      *      description="Returns question data",
      *      @OA\Parameter(
@@ -108,7 +100,7 @@ class AuthController extends Controller
      * @OA\Post(
      *     path="/login",
      *     operationId="LoginUser",
-     *     tags={"Auth"},
+     *     tags={"Auth Api"},
      *     summary="login user",
      *     description="Returns question data",
      *     @OA\Parameter(
@@ -178,7 +170,7 @@ class AuthController extends Controller
      * @OA\Post(
      *     path="/logout",
      *     operationId="Logged",
-     *     tags={"Auth"},
+     *     tags={"Auth Api"},
      *     summary="logout user",
      *     description="Returns question data",
      *     @OA\RequestBody(

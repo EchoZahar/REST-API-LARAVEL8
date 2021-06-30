@@ -13,11 +13,7 @@
     },
     "servers": [
         {
-            "url": "127.0.0.1:8000/api/",
-            "description": "Demo tech task API server"
-        },
-        {
-            "url": "127.0.0.1:8000/api/",
+            "url": "/api/",
             "description": "Demo tech task API server"
         }
     ],
@@ -25,7 +21,7 @@
         "/register": {
             "post": {
                 "tags": [
-                    "Auth"
+                    "Auth Api"
                 ],
                 "summary": "Register new user",
                 "description": "Returns question data",
@@ -75,7 +71,7 @@
         "/login": {
             "post": {
                 "tags": [
-                    "Auth"
+                    "Auth Api"
                 ],
                 "summary": "login user",
                 "description": "Returns question data",
@@ -117,7 +113,7 @@
         "/logout": {
             "post": {
                 "tags": [
-                    "Auth"
+                    "Auth Api"
                 ],
                 "summary": "logout user",
                 "description": "Returns question data",
@@ -143,13 +139,21 @@
                 "tags": [
                     "Questions"
                 ],
-                "summary": "Display a listing of the resource.",
-                "operationId": "bc6b2000253073621eea4788cc34144b",
+                "summary": "Получение всех обращении с использоваение простой пагинаций, по 3 обращения (simplePaginate(3))",
+                "operationId": "QuestionAll",
                 "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Пагинация",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
                     {
                         "name": "search",
                         "in": "query",
-                        "description": "Question page use search",
+                        "description": "Поиск по имени пользователя",
                         "schema": {
                             "type": "string"
                         }
@@ -323,6 +327,25 @@
             }
         }
     },
+    "components": {
+        "securitySchemes": {
+            "X-CSRF-TOKEN": {
+                "type": "apiKey",
+                "name": "X-CSRF-TOKEN",
+                "in": "header"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Questions",
+            "description": "Раздел создания обращения, ответа пользователю, обновление и удаления."
+        },
+        {
+            "name": "Auth Api",
+            "description": "API: Регистрация, вход, выход получение и удаление токена."
+        }
+    ],
     "security": [
         []
     ]
