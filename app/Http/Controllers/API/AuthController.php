@@ -8,6 +8,14 @@ use App\Models\User;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 
+/**
+ * Class AuthController
+ * @package App\Http\Controllers\API*
+ * @OA\Server(
+ *     url="127.0.0.1:8000/api/",
+ *     description="Demo tech task API server"
+ * )
+ */
 class AuthController extends Controller
 {
     /**
@@ -18,6 +26,52 @@ class AuthController extends Controller
      * Display a listing of the resource.
      * @return \Illuminate\Http\Response
      *
+     * @OA\Post(
+     *      path="/register",
+     *      operationId="RegisterNewUser",
+     *      tags={"Auth"},
+     *      summary="Register new user",
+     *      description="Returns question data",
+     *      @OA\Parameter(
+     *         description="enter your email",
+     *         name="email",
+     *         in="query",
+     *         @OA\Schema(
+     *             type="string",
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         description="enter your eamil",
+     *         name="email",
+     *         in="query",
+     *         @OA\Schema(
+     *             type="string",
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         description="enter your password",
+     *         name="password",
+     *         in="query",
+     *         @OA\Schema(
+     *             type="text",
+     *         )
+     *     ),
+     *      @OA\RequestBody(
+     *          required=true,
+     *      ),
+     *      @OA\Response(
+     *          response=201,
+     *          description="Successful registration",
+     *       ),
+     *      @OA\Response(
+     *          response=400,
+     *          description="Bad Request"
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden"
+     *      )
+     * )
      */
     public function register(Request $request)
     {
@@ -45,10 +99,50 @@ class AuthController extends Controller
 
     /**
      * @param Request $request
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|Response
+     * @return \Illuminate\Contracts\Foundation\Application
+     * @return \Illuminate\Contracts\Routing\ResponseFactory
+     * @return Response
      * check email
      * check password
      * get token this user
+     * @OA\Post(
+     *     path="/login",
+     *     operationId="LoginUser",
+     *     tags={"Auth"},
+     *     summary="login user",
+     *     description="Returns question data",
+     *     @OA\Parameter(
+     *         description="enter your eamil",
+     *         name="email",
+     *         in="query",
+     *         @OA\Schema(
+     *             type="string",
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         description="enter your password",
+     *         name="password",
+     *         in="query",
+     *         @OA\Schema(
+     *             type="password",
+     *         )
+     *     ),
+     *      @OA\RequestBody(
+     *          required=true,
+     *      ),
+     *      @OA\Response(
+     *          response=201,
+     *          description="Successful registration",
+     *       ),
+     *      @OA\Response(
+     *          response=400,
+     *          description="Bad Request"
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden"
+     *      )
+     * )
      */
     public function login(Request $request)
     {
@@ -62,7 +156,7 @@ class AuthController extends Controller
         if (!$user || !Hash::check($data['password'], $user->password))
         {
             return response([
-                'message' => 'Bad creds'
+                'message' => 'Bad credentials'
             ], 401);
         }
         // get token
@@ -76,13 +170,37 @@ class AuthController extends Controller
         return response($response, 201);
     }
 
-
+    /**
+     * @param Request $request
+     * @return string[]
+     * выход с удалением token пользователя
+     *
+     * @OA\Post(
+     *     path="/logout",
+     *     operationId="Logged",
+     *     tags={"Auth"},
+     *     summary="logout user",
+     *     description="Returns question data",
+     *     @OA\RequestBody(
+     *          required=true,
+     *     ),
+     *     @OA\Response(
+     *          response=201,
+     *          description="Successful registration",
+     *     ),
+     *     @OA\Response(
+     *          response=400,
+     *          description="Bad Request"
+     *     ),
+     *     @OA\Response(
+     *          response=403,
+     *          description="Forbidden"
+     *     )
+     * )
+     */
     public function logout(Request $request)
     {
         auth()->user()->tokens()->delete();
-
-        return [
-            'message' => 'logged out'
-        ];
+        return ['message' => 'logged out'];
     }
 }

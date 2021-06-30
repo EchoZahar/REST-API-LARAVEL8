@@ -3,87 +3,374 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\QuestionStoreRequest;
+use App\Http\Requests\QuestionUpdateRequest;
+use App\Mail\NewQuestionMail;
+use App\Mail\SendQuestionMail;
 use App\Models\Question;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Mail;
 
+/**
+ * @OA\Info(
+ *     title="Question API swagger documentation",
+ *     version="0.0.1",
+ *     @OA\Contact(
+ *          email="echo.zahar@gmail.com"
+ *      ),
+ *     @OA\License(
+ *          name="Apache 2.0",
+ *          url="http://www.apache.org/licenses/LICENSE-2.0.html"
+ *      )
+ * )
+ * @OA\Server(
+ *     url="127.0.0.1:8000/api/",
+ *     description="Demo tech task API server"
+ * )
+ */
 class QuestionController extends Controller
 {
+
     /**
      * Display a listing of the resource.
+     * @return Response
      *
-     * @return \Illuminate\Http\Response
+     * @OA\Get(
+     *      path="/questions",
+     *      tags={"Questions"},
+     *      @OA\Parameter(
+     *         description="Question page use search",
+     *         name="search",
+     *         in="query",
+     *         @OA\Schema(
+     *             type="string",
+     *          )
+     *       ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden"
+     *      ),
+     *      @OA\Response(
+     *          response=404,
+     *          description="not found"
+     *      ),
+     *      @OA\Response(
+     *          response="200",
+     *          description="An example resource"
+     *      ),
+     * )
      */
-    public function index()
+    public function index(Request $request)
     {
-        return Question::all();
+//        return $this->filter($request);
+        return Question::latest()->simplePaginate(10);
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @return Response
+     * @OA\Post(
+     *      path="/questions",
+     *      operationId="QuestionStoreRequest",
+     *      operationId="NewQuestionMail",
+     *      tags={"Questions"},
+     *      summary="Store new question",
+     *      description="Returns question data",
+     *      @OA\Parameter(
+     *         description="enter your name",
+     *         name="your name",
+     *         in="query",
+     *         @OA\Schema(
+     *             type="string",
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         description="enter your eamil",
+     *         name="your email",
+     *         in="query",
+     *         @OA\Schema(
+     *             type="string",
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         description="enter your message",
+     *         name="message",
+     *         in="query",
+     *         @OA\Schema(
+     *             type="text",
+     *         )
+     *     ),
+     *      @OA\RequestBody(
+     *          required=true,
+     *      ),
+     *      @OA\Response(
+     *          response=201,
+     *          description="Successful operation",
+     *       ),
+     *      @OA\Response(
+     *          response=400,
+     *          description="Bad Request"
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden"
+     *      )
+     * )
      */
-    public function store(Request $request)
+    public function store(QuestionStoreRequest $request)
     {
-        $request->validate([
-            'name'      => ['required','max:50'],
-            'email'     => ['required','email','min:5','max:100'],
-            'message'   => ['required','min:5','max:500'],
-        ]);
-        return Question::create($request->all());
+        $data = $request->only('name', 'email', 'message');
+        $question = Question::create($data);
+        if (!$question) {
+            return response(['message' => 'что то пошло не так !'], 400);
+        }
+        // Отправка email сообщения пользователю
+        Mail::to($question->email)->send(new NewQuestionMail($question));
+        return response($question, 201);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param int $id
+     * @return Response
+     *
+     * @OA\Get (
+     *      path="/questions/{id}",
+     *      operationId="getQuestionById",
+     *      tags={"Questions"},
+     *      summary="Show question information",
+     *      description="Returns questiion data",
+     *      @OA\Parameter (
+     *          name="id",
+     *          description="Question ID",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(
+     *              type="integer"
+     *          )
+     *      ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Question not found",
+     *     ),
+     *     @OA\Response(
+     *          response="default",
+     *          response="200",
+     *          description="Status OK"
+     *     )
+     * )
      */
     public function show($id)
     {
-        return Question::find($id);
+        $question = Question::find($id);
+        if (!$question) {
+            return response(['message' => 'не найдено !'], 404);
+        }
+        return response($question, 200);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @param int $id
+     * @return Response
+     *
+     * @OA\Put (
+     *     path="/questions/{id}",
+     *      operationId="updateQuestion",
+     *      tags={"Questions"},
+     *      summary="Update existing question",
+     *      description="Returns updated project data",
+     *      @OA\Parameter(
+     *          name="id",
+     *          description="Question id",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(
+     *              type="integer"
+     *          )
+     *      ),
+     *      @OA\RequestBody(
+     *          required=true,
+     *      ),
+     *      @OA\Response(
+     *          response=202,
+     *          description="Successful updated",
+     *       ),
+     *      @OA\Response(
+     *          response=400,
+     *          description="Bad Request"
+     *      ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden"
+     *      ),
+     *      @OA\Response(
+     *          response=404,
+     *          description="Question Not Found"
+     *      )
+     * )
      */
-    public function update(Request $request, $id)
+    public function update(QuestionUpdateRequest $request, $id)
     {
         $question = Question::find($id);
-        $request->validate([
-            'name'      => ['required','max:50'],
-            'email'     => ['required','email','min:5','max:100'],
-            'message'   => ['required','min:5','max:2000'],
-            // только зарегастрированный пользователь
-            'comment'   => ['required','min:5','max:500'],
-            'user_id'   => ['required']
-        ]);
-        $question->update($request->all());
-        return $question;
+        if (!$question) {
+            return response(['message' => 'не найдено !'], 404);
+        }
+        $data = $request->only('comment');
+        if ($data != null) {
+            $data['user_id'] = auth()->user()->id;
+            $data['status'] = Question::RESOLVED;
+            $question->dateTime = Carbon::now();
+        }
+        $question->update($data);
+        Mail::to($question->email)->send(new SendQuestionMail($question));
+//        return response($question, 200);
+        return [$question, ['message' => 'Запись успешно обновлена, email отправлен пользователю !']];
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param int $id
+     * @return Response
+     *
+     * @OA\Delete (
+     *     path="/questions/{id}",
+     *      operationId="deleteProject",
+     *      tags={"Questions"},
+     *      summary="Delete existing question",
+     *      description="Deletes a record and returns no content",
+     *      @OA\Parameter(
+     *          name="id",
+     *          description="Question id",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(
+     *              type="integer"
+     *          )
+     *      ),
+     *      @OA\Response(
+     *          response=204,
+     *          description="Successful deleted",
+     *          @OA\JsonContent()
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden"
+     *      ),
+     *      @OA\Response(
+     *          response=404,
+     *          description="Question Not Found"
+     *      )
+     * )
      */
     public function destroy($id)
     {
-        return Question::destroy($id);
+        $question = Question::find($id);
+        if (!$question) {
+            return response(['message' => 'не найдено !'], 404);
+        }
+        $question->destroy($id);
+        return response($question, 200);
     }
 
     /**
      * @param string $name
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function search($name)
     {
-        return Question::where('name', 'like', '%'.$name.'%')->get();
+        return Question::where('name', 'like', '%' . $name . '%')->get();
+    }
+
+    /**
+     * @param Request $request
+     * @return mixed
+     * Фильтр метод GET
+     * Если необходимо можно перенести в отдельный репозитории
+     * данный метод будет использоваться на главной странице (если будет)
+     */
+    public function filter(Request $request)
+    {
+        $status = [
+            'активные' => Question::ACTIVE,
+            'завершеные' => Question::RESOLVED,
+        ];
+        /**
+         * возвращает загрузку модели
+         * все методы можно посмотреть через: dd(get_class_methods($request));
+         */
+        $filter = Question::query();
+
+        /**
+         * фильтрация по статусу
+         */
+        if ($request->filled('status') != null) {
+            $filter->where('status', '=', $request->status);
+        }
+
+        /**
+         * фильтрация по возрастанию даты
+         */
+        if ($request->filled('dateAsc') && $request->input('dateAsc') == 'on') {
+            $filter->orderBy('id', 'asc');
+        }
+
+        /**
+         * фильтрация по убыванию даты
+         */
+        if ($request->filled('dateDesc') && $request->input('dateDesc') == 'on') {
+            $filter->orderBy('id', 'desc');
+        }
+
+        if ($request->filled('dateDesc') && $request->filled('dateAsc')) {
+            $filter->orderBy('id', 'desc');
+        }
+
+        /**
+         * фильтрация по дате c ...
+         */
+        if ($request->filled('dateStart')) {
+            $filter->whereDate('created_at', '>=', $request->input('dateStart'));
+        }
+
+        /**
+         * фильтрация по дате до ...
+         */
+        if ($request->filled('dateEnd')) {
+            $filter->whereDate('created_at', '<=', $request->input('dateEnd'));
+        }
+
+        /**
+         * заявки в диапозоне от и до выбранной даты.
+         */
+        if ($request->filled('dateStart') && $request->filled('dateEnd')) {
+            $filter->whereDate('created_at', '>=', $request->input('dateStart'))
+                ->whereDate('created_at', '<=', $request->input('dateEnd'));
+        }
+
+        /**
+         * метод simplePaginate(), возвращает количество записей на страницу
+         * ->withPath('?' . $request->getQueryString()) - принимает значение фильтров,
+         * метод getQueryString() добавляет параметр в пагинацию
+         * переход по страницам отфильтрованных данных
+         */
+        $questions = $filter->latest()->simplePaginate(10)->withPath('?' . $request->getQueryString());
+        return $questions;
     }
 }
