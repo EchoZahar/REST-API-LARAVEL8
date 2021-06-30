@@ -10,14 +10,57 @@ use App\Mail\SendQuestionMail;
 use App\Models\Question;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Mail;
 
+/**
+ * @OA\Info(
+ *     title="Question API swagger documentation",
+ *     version="0.0.1",
+ *     @OA\Contact(
+ *          email="echo.zahar@gmail.com"
+ *      ),
+ *     @OA\License(
+ *          name="Apache 2.0",
+ *          url="http://www.apache.org/licenses/LICENSE-2.0.html"
+ *      )
+ * )
+ * @OA\Server(
+ *     url="127.0.0.1:8000/api/",
+ *     description="Demo tech task API server"
+ * )
+ */
 class QuestionController extends Controller
 {
+
     /**
      * Display a listing of the resource.
+     * @return Response
      *
-     * @return \Illuminate\Http\Response
+     * @OA\Get(
+     *      path="/questions",
+     *      tags={"Questions"},
+     *      @OA\Parameter(
+     *         description="Question page use search",
+     *         name="search",
+     *         in="query",
+     *         @OA\Schema(
+     *             type="string",
+     *          )
+     *       ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden"
+     *      ),
+     *      @OA\Response(
+     *          response=404,
+     *          description="not found"
+     *      ),
+     *      @OA\Response(
+     *          response="200",
+     *          description="An example resource"
+     *      ),
+     * )
      */
     public function index(Request $request)
     {
@@ -28,26 +71,99 @@ class QuestionController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @return Response
+     * @OA\Post(
+     *      path="/questions",
+     *      operationId="QuestionStoreRequest",
+     *      operationId="NewQuestionMail",
+     *      tags={"Questions"},
+     *      summary="Store new question",
+     *      description="Returns question data",
+     *      @OA\Parameter(
+     *         description="enter your name",
+     *         name="your name",
+     *         in="query",
+     *         @OA\Schema(
+     *             type="string",
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         description="enter your eamil",
+     *         name="your email",
+     *         in="query",
+     *         @OA\Schema(
+     *             type="string",
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         description="enter your message",
+     *         name="message",
+     *         in="query",
+     *         @OA\Schema(
+     *             type="text",
+     *         )
+     *     ),
+     *      @OA\RequestBody(
+     *          required=true,
+     *      ),
+     *      @OA\Response(
+     *          response=201,
+     *          description="Successful operation",
+     *       ),
+     *      @OA\Response(
+     *          response=400,
+     *          description="Bad Request"
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden"
+     *      )
+     * )
      */
     public function store(QuestionStoreRequest $request)
     {
         $data = $request->only('name', 'email', 'message');
         $question = Question::create($data);
         if (!$question) {
-            return response(['message' => 'что то пошло не так !'], 422);
+            return response(['message' => 'что то пошло не так !'], 400);
         }
         // Отправка email сообщения пользователю
         Mail::to($question->email)->send(new NewQuestionMail($question));
-        return response($question, 200);
+        return response($question, 201);
     }
 
     /**
      * Display the specified resource.
      *
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return Response
+     *
+     * @OA\Get (
+     *      path="/questions/{id}",
+     *      operationId="getQuestionById",
+     *      tags={"Questions"},
+     *      summary="Show question information",
+     *      description="Returns questiion data",
+     *      @OA\Parameter (
+     *          name="id",
+     *          description="Question ID",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(
+     *              type="integer"
+     *          )
+     *      ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Question not found",
+     *     ),
+     *     @OA\Response(
+     *          response="default",
+     *          response="200",
+     *          description="Status OK"
+     *     )
+     * )
      */
     public function show($id)
     {
@@ -61,9 +177,49 @@ class QuestionController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return Response
+     *
+     * @OA\Put (
+     *     path="/questions/{id}",
+     *      operationId="updateQuestion",
+     *      tags={"Questions"},
+     *      summary="Update existing question",
+     *      description="Returns updated project data",
+     *      @OA\Parameter(
+     *          name="id",
+     *          description="Question id",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(
+     *              type="integer"
+     *          )
+     *      ),
+     *      @OA\RequestBody(
+     *          required=true,
+     *      ),
+     *      @OA\Response(
+     *          response=202,
+     *          description="Successful updated",
+     *       ),
+     *      @OA\Response(
+     *          response=400,
+     *          description="Bad Request"
+     *      ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden"
+     *      ),
+     *      @OA\Response(
+     *          response=404,
+     *          description="Question Not Found"
+     *      )
+     * )
      */
     public function update(QuestionUpdateRequest $request, $id)
     {
@@ -87,7 +243,41 @@ class QuestionController extends Controller
      * Remove the specified resource from storage.
      *
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return Response
+     *
+     * @OA\Delete (
+     *     path="/questions/{id}",
+     *      operationId="deleteProject",
+     *      tags={"Questions"},
+     *      summary="Delete existing question",
+     *      description="Deletes a record and returns no content",
+     *      @OA\Parameter(
+     *          name="id",
+     *          description="Question id",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(
+     *              type="integer"
+     *          )
+     *      ),
+     *      @OA\Response(
+     *          response=204,
+     *          description="Successful deleted",
+     *          @OA\JsonContent()
+     *       ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Forbidden"
+     *      ),
+     *      @OA\Response(
+     *          response=404,
+     *          description="Question Not Found"
+     *      )
+     * )
      */
     public function destroy($id)
     {
@@ -101,7 +291,7 @@ class QuestionController extends Controller
 
     /**
      * @param string $name
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function search($name)
     {
