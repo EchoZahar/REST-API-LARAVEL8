@@ -145,17 +145,9 @@
                     {
                         "name": "page",
                         "in": "query",
-                        "description": "Пагинация",
+                        "description": "Пагинация по страницам",
                         "schema": {
                             "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "search",
-                        "in": "query",
-                        "description": "Поиск по имени пользователя",
-                        "schema": {
-                            "type": "string"
                         }
                     }
                 ],
@@ -175,47 +167,34 @@
                 "tags": [
                     "Questions"
                 ],
-                "summary": "Store new question",
-                "description": "Returns question data",
-                "operationId": "NewQuestionMail",
-                "parameters": [
-                    {
-                        "name": "your name",
-                        "in": "query",
-                        "description": "enter your name",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "your email",
-                        "in": "query",
-                        "description": "enter your eamil",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "message",
-                        "in": "query",
-                        "description": "enter your message",
-                        "schema": {
-                            "type": "text"
+                "summary": "Сохранение новой заявки от пользователя",
+                "description": "Store a newly created resource in storage.",
+                "operationId": "storeQuestion",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/QuestionStoreRequest"
+                            }
                         }
                     }
-                ],
-                "requestBody": {
-                    "required": true
                 },
                 "responses": {
+                    "200": {
+                        "description": "Обращение успешно добавлено."
+                    },
                     "201": {
-                        "description": "Successful operation"
+                        "description": "Обращение успешно добавлено."
                     },
                     "400": {
                         "description": "Bad Request"
                     },
                     "403": {
                         "description": "Forbidden"
+                    },
+                    "419": {
+                        "description": "Undocumented, стек срок действия страницы."
                     }
                 }
             }
@@ -225,8 +204,8 @@
                 "tags": [
                     "Questions"
                 ],
-                "summary": "Show question information",
-                "description": "Returns questiion data",
+                "summary": "Показать запись по id",
+                "description": "Display the specified resource.",
                 "operationId": "getQuestionById",
                 "parameters": [
                     {
@@ -241,10 +220,10 @@
                 ],
                 "responses": {
                     "404": {
-                        "description": "Question not found"
+                        "description": "Что то, пошло не так, записи не нсйдено."
                     },
                     "200": {
-                        "description": "Status OK"
+                        "description": "Данные успешно, загружены."
                     }
                 }
             },
@@ -252,14 +231,14 @@
                 "tags": [
                     "Questions"
                 ],
-                "summary": "Update existing question",
-                "description": "Returns updated project data",
-                "operationId": "updateQuestion",
+                "summary": "Обновление записи. Добавить ответ от администратора",
+                "description": "Update the specified resource in storage.",
+                "operationId": "questionUpdate",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Question id",
+                        "description": "Метод обновления, по id записи.",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -267,33 +246,51 @@
                     }
                 ],
                 "requestBody": {
-                    "required": true
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/QuestionUpdateRequest"
+                            }
+                        }
+                    }
                 },
                 "responses": {
+                    "200": {
+                        "description": "Обращение успешно добавлено."
+                    },
                     "202": {
-                        "description": "Successful updated"
+                        "description": "Запись успешно обновлена"
                     },
                     "400": {
                         "description": "Bad Request"
                     },
                     "401": {
-                        "description": "Unauthenticated"
+                        "description": "не авторизован"
                     },
                     "403": {
                         "description": "Forbidden"
                     },
                     "404": {
-                        "description": "Question Not Found"
+                        "description": "Что то пошло не так, запись не найдена."
+                    },
+                    "419": {
+                        "description": "Undocumented, стек срок действия страницы."
                     }
-                }
+                },
+                "security": [
+                    {
+                        "api_id": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
                     "Questions"
                 ],
-                "summary": "Delete existing question",
-                "description": "Deletes a record and returns no content",
-                "operationId": "deleteProject",
+                "summary": "Мягкое удаление (из БД не удаляется) обращения",
+                "description": "Remove the specified resource from storage.",
+                "operationId": "destroy",
                 "parameters": [
                     {
                         "name": "id",
@@ -307,7 +304,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "Successful deleted",
+                        "description": "Запись успешно удалена",
                         "content": {
                             "application/json": {
                                 "schema": {}
@@ -321,13 +318,96 @@
                         "description": "Forbidden"
                     },
                     "404": {
-                        "description": "Question Not Found"
+                        "description": "Что то пошло не так, запись не найдена."
+                    }
+                },
+                "security": [
+                    {
+                        "api_id": []
+                    }
+                ]
+            }
+        },
+        "/questions/search/{name}": {
+            "get": {
+                "tags": [
+                    "Questions"
+                ],
+                "summary": "поиск по имени пользователя составивщего заявку",
+                "operationId": "search",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "description": "поиск по имени пользователя составивщего заявку",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "404": {
+                        "description": "не найдено"
+                    },
+                    "200": {
+                        "description": "статус 'ОК'"
                     }
                 }
             }
         }
     },
     "components": {
+        "schemas": {
+            "QuestionStoreRequest": {
+                "title": "сохранение обращения пользователя",
+                "description": "создание новой записи, заявка от пользователя",
+                "properties": {
+                    "name": {
+                        "title": "имя пользователя",
+                        "description": "Нужно ввести имя пользователя. Обязательное поле, минимальная длина 2, максимальное 50.",
+                        "type": "string",
+                        "format": "string",
+                        "example": "Customer"
+                    },
+                    "email": {
+                        "title": "email пользователя.",
+                        "description": "email пользователя. Обязателеное поле, минимальная длина 5, максимальная 100. ",
+                        "type": "string",
+                        "format": "string",
+                        "example": "customer@example.com"
+                    },
+                    "message": {
+                        "title": "сообщение от пользователя.",
+                        "description": "сообщение, обращение пользователя, обязателеное поле с максимальным значением 500.",
+                        "type": "string",
+                        "format": "string",
+                        "example": "Мое сообщение ..........."
+                    },
+                    "status": {
+                        "title": "Статус записи",
+                        "description": "По умолчанию статус записи, будет активным.",
+                        "type": "string",
+                        "format": "string",
+                        "example": "active"
+                    }
+                },
+                "type": "object"
+            },
+            "QuestionUpdateRequest": {
+                "title": "Ответ пользователю от администратору.",
+                "description": "Обновление записи, заявка от пользователя",
+                "properties": {
+                    "comment": {
+                        "title": "Ответ пользователю от администратора.",
+                        "description": "Введите ответ пользователю, минимальная длина 5,  максимальная 500 символов.",
+                        "type": "string",
+                        "format": "string",
+                        "example": "какой то, текст."
+                    }
+                },
+                "type": "object"
+            }
+        },
         "securitySchemes": {
             "X-CSRF-TOKEN": {
                 "type": "apiKey",
