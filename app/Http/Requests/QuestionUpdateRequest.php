@@ -2,9 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Question;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class QuestionUpdateRequest extends FormRequest
 {
@@ -26,14 +24,14 @@ class QuestionUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'name'      => ['required', 'max:50'],
-            'email'     => ['required', 'email', 'min:5', 'max:100'],
-            'message'   => ['required', 'min:5', 'max:2000'],
+//            'name'      => ['required', 'max:50'],
+//            'email'     => ['required', 'email', 'min:5', 'max:100'],
+//            'message'   => ['required', 'min:5', 'max:2000'],
             // только зарегастрированный пользователь
-            'status'    => ['required', Rule::In(Question::$types)],
-            'dateStart' => ['nullable','date'],
-            'comment'   => ['required', 'min:5', 'max:500'],
-            'user_id'   => ['nullable']
+//            'status'    => ['required', Rule::In(Question::$types)],
+            'dateStart' => ['nullable', 'date'],
+            'comment' => ['required', 'min:5', 'max:500'],
+            'user_id' => ['nullable', 'integer']
         ];
     }
 }

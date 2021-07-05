@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\QuestionController;
-use \App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,14 +24,15 @@ Route::get('/questions', [QuestionController::class, 'index']);
 Route::post('/questions', [QuestionController::class, 'store']);
 Route::get('/questions/{id}', [QuestionController::class, 'show']);
 Route::get('/questions/search/{name}', [QuestionController::class, 'search']);
+Route::put('/questions/{id}', [QuestionController::class, 'update']);
+Route::delete('/questions/{id}', [QuestionController::class, 'destroy']);
 
 // protected routes
 Route::group(['middleware'=> ['auth:sanctum']], function () {
-    Route::put('/questions/{id}', [QuestionController::class, 'update']);
-    Route::delete('/questions/{id}', [QuestionController::class, 'destroy']);
+
     Route::post('/logout',[AuthController::class, 'logout']);
 });
 
-//Route::middleware('auth:api')->get('/user', function (Request $request) {
-//    return $request->user();
-//});
+Route::middleware('auth:api')->get('/user', function (Request $request) {
+    return $request->user();
+});

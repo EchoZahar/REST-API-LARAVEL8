@@ -1,15 +1,16 @@
 <?php
 
+
 namespace App\Models\ExamplesAPI;
 
 /**
  * @OA\Schema (
- *     description="создание новой записи, заявка от пользователя.",
+ *     description="Регистрация пользователей.",
  *     type="object",
- *     title="Сохранение обращения пользователя."
+ *     title="регистрация нового пользователя."
  * )
  */
-class QuestionStoreRequest
+class AuthRegister
 {
     /**
      * @var string
@@ -39,11 +40,23 @@ class QuestionStoreRequest
      * @var string
      *
      * @OA\Property (
-     *     title="сообщение от пользователя.",
-     *     description="сообщение, обращение пользователя, обязателеное поле с максимальным значением 500.",
-     *     format="string",
-     *     example="Мое сообщение ..........."
+     *     title="пароль пользователя.",
+     *     description="введите пароль",
+     *     format="password",
+     *     example="password"
      * )
      */
-    public $message;
+    public $password;
+
+    /**
+     * @var string
+     *
+     * @OA\Property (
+     *     title="подтверждение пароля",
+     *     description="введите пароль еще раз",
+     *     format="password",
+     *     example="password"
+     * )
+     */
+    public $password_confirmation;
 }
