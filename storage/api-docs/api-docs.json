@@ -9,7 +9,7 @@
             "name": "Apache 2.0",
             "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
         },
-        "version": "0.0.1"
+        "version": "0.0.2"
     },
     "servers": [
         {
@@ -23,41 +23,22 @@
                 "tags": [
                     "Auth Api"
                 ],
-                "summary": "Register new user",
-                "description": "Returns question data",
-                "operationId": "RegisterNewUser",
-                "parameters": [
-                    {
-                        "name": "email",
-                        "in": "query",
-                        "description": "enter your email",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "email",
-                        "in": "query",
-                        "description": "enter your eamil",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "password",
-                        "in": "query",
-                        "description": "enter your password",
-                        "schema": {
-                            "type": "text"
+                "summary": "Регистрация нового пользователя",
+                "description": "",
+                "operationId": "e66f8a7452e13b03ae4e77dbb42e435c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AuthRegister"
+                            }
                         }
                     }
-                ],
-                "requestBody": {
-                    "required": true
                 },
                 "responses": {
                     "201": {
-                        "description": "Successful registration"
+                        "description": "Пользователь успешно зарегестрирован"
                     },
                     "400": {
                         "description": "Bad Request"
@@ -73,29 +54,17 @@
                 "tags": [
                     "Auth Api"
                 ],
-                "summary": "login user",
-                "description": "Returns question data",
-                "operationId": "LoginUser",
-                "parameters": [
-                    {
-                        "name": "email",
-                        "in": "query",
-                        "description": "enter your eamil",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "password",
-                        "in": "query",
-                        "description": "enter your password",
-                        "schema": {
-                            "type": "password"
+                "summary": "Авторизация пользователя",
+                "operationId": "d618a255475240ba3d40cc39692cd924",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AuthLoginRequest"
+                            }
                         }
                     }
-                ],
-                "requestBody": {
-                    "required": true
                 },
                 "responses": {
                     "201": {
@@ -118,9 +87,6 @@
                 "summary": "logout user",
                 "description": "Returns question data",
                 "operationId": "Logged",
-                "requestBody": {
-                    "required": true
-                },
                 "responses": {
                     "201": {
                         "description": "Successful registration"
@@ -152,14 +118,14 @@
                     }
                 ],
                 "responses": {
+                    "200": {
+                        "description": "Успешно загружено."
+                    },
                     "403": {
                         "description": "Forbidden"
                     },
                     "404": {
                         "description": "not found"
-                    },
-                    "200": {
-                        "description": "An example resource"
                     }
                 }
             },
@@ -181,20 +147,21 @@
                     }
                 },
                 "responses": {
-                    "200": {
-                        "description": "Обращение успешно добавлено."
-                    },
                     "201": {
-                        "description": "Обращение успешно добавлено."
+                        "description": "Обращение успешно добавлено.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Questions"
+                                }
+                            }
+                        }
                     },
                     "400": {
                         "description": "Bad Request"
                     },
                     "403": {
                         "description": "Forbidden"
-                    },
-                    "419": {
-                        "description": "Undocumented, стек срок действия страницы."
                     }
                 }
             }
@@ -219,11 +186,18 @@
                     }
                 ],
                 "responses": {
-                    "404": {
-                        "description": "Что то, пошло не так, записи не нсйдено."
-                    },
                     "200": {
-                        "description": "Данные успешно, загружены."
+                        "description": "Данные успешно, загружены.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Questions"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Что то, пошло не так, записи не нaйдено."
                     }
                 }
             },
@@ -256,9 +230,6 @@
                     }
                 },
                 "responses": {
-                    "200": {
-                        "description": "Обращение успешно добавлено."
-                    },
                     "202": {
                         "description": "Запись успешно обновлена"
                     },
@@ -275,14 +246,9 @@
                         "description": "Что то пошло не так, запись не найдена."
                     },
                     "419": {
-                        "description": "Undocumented, стек срок действия страницы."
+                        "description": "Что то пошло не так!"
                     }
-                },
-                "security": [
-                    {
-                        "api_id": []
-                    }
-                ]
+                }
             },
             "delete": {
                 "tags": [
@@ -295,7 +261,7 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Question id",
+                        "description": "Введите id записи для удаления",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -304,12 +270,7 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "Запись успешно удалена",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
+                        "description": "Запись успешно удалена"
                     },
                     "401": {
                         "description": "Unauthenticated"
@@ -320,12 +281,7 @@
                     "404": {
                         "description": "Что то пошло не так, запись не найдена."
                     }
-                },
-                "security": [
-                    {
-                        "api_id": []
-                    }
-                ]
+                }
             }
         },
         "/questions/search/{name}": {
@@ -358,9 +314,75 @@
     },
     "components": {
         "schemas": {
+            "AuthLoginRequest": {
+                "title": "Авторизация.",
+                "description": "Авторизация пользователей.",
+                "properties": {
+                    "email": {
+                        "title": "email пользователя.",
+                        "description": "email пользователя. Обязателеное поле, минимальная длина 5, максимальная 100. ",
+                        "type": "string",
+                        "format": "string",
+                        "example": "customer@example.com"
+                    },
+                    "password": {
+                        "title": "Пароль пользователя.",
+                        "description": "введите пароль.",
+                        "type": "string",
+                        "format": "password",
+                        "example": "password"
+                    }
+                },
+                "type": "object"
+            },
+            "AuthRegister": {
+                "title": "регистрация нового пользователя.",
+                "description": "Регистрация пользователей.",
+                "properties": {
+                    "name": {
+                        "title": "имя пользователя",
+                        "description": "Нужно ввести имя пользователя. Обязательное поле, минимальная длина 2, максимальное 50.",
+                        "type": "string",
+                        "format": "string",
+                        "example": "Customer"
+                    },
+                    "email": {
+                        "title": "email пользователя.",
+                        "description": "email пользователя. Обязателеное поле, минимальная длина 5, максимальная 100. ",
+                        "type": "string",
+                        "format": "string",
+                        "example": "customer@example.com"
+                    },
+                    "password": {
+                        "title": "пароль пользователя.",
+                        "description": "введите пароль",
+                        "type": "string",
+                        "format": "password",
+                        "example": "password"
+                    },
+                    "password_confirmation": {
+                        "title": "подтверждение пароля",
+                        "description": "введите пароль еще раз",
+                        "type": "string",
+                        "format": "password",
+                        "example": "password"
+                    }
+                },
+                "type": "object"
+            },
+            "QuestionRequest": {
+                "title": "Обращения пользователей.",
+                "description": "Получение всех записей, обращений, структура таблицы.",
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/Questions"
+                    }
+                },
+                "type": "object"
+            },
             "QuestionStoreRequest": {
-                "title": "сохранение обращения пользователя",
-                "description": "создание новой записи, заявка от пользователя",
+                "title": "Сохранение обращения пользователя.",
+                "description": "создание новой записи, заявка от пользователя.",
                 "properties": {
                     "name": {
                         "title": "имя пользователя",
@@ -382,13 +404,6 @@
                         "type": "string",
                         "format": "string",
                         "example": "Мое сообщение ..........."
-                    },
-                    "status": {
-                        "title": "Статус записи",
-                        "description": "По умолчанию статус записи, будет активным.",
-                        "type": "string",
-                        "format": "string",
-                        "example": "active"
                     }
                 },
                 "type": "object"
@@ -403,27 +418,118 @@
                         "type": "string",
                         "format": "string",
                         "example": "какой то, текст."
+                    },
+                    "user_id": {
+                        "title": "User ID",
+                        "description": "Авторизированный пользователь",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
                     }
                 },
                 "type": "object"
+            },
+            "Questions": {
+                "title": "Обращения",
+                "description": "Модель обращении пользователей, структура и описание.",
+                "properties": {
+                    "id": {
+                        "title": "id",
+                        "description": "id обрщения",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "name": {
+                        "title": "Имя пользователя",
+                        "description": "имя обращающегося",
+                        "type": "string",
+                        "format": "string",
+                        "example": "customer"
+                    },
+                    "email": {
+                        "title": "email обращающегося",
+                        "description": "email пользователя (добавить описане из валидаций)",
+                        "format": "email",
+                        "example": "customer@example.com"
+                    },
+                    "status": {
+                        "title": "статус записи",
+                        "description": "2 вида статуса: active (активные обращения) и resolved - закрытый",
+                        "format": "email",
+                        "example": "active"
+                    },
+                    "message": {
+                        "title": "Обращение от пользователя",
+                        "description": "",
+                        "format": "string",
+                        "example": "Это пример текста обращения."
+                    },
+                    "dateAction": {
+                        "title": "Дата ответа от админа",
+                        "description": "Поле не обязательно для заполнения",
+                        "format": "datetime",
+                        "example": "2021-12-21 21:21:21"
+                    },
+                    "comment": {
+                        "title": "Ответ администратора",
+                        "description": "Ответ администратора на обращение пользователя",
+                        "format": "string",
+                        "example": "Ответ на ваш вопрос ...."
+                    },
+                    "user_id": {
+                        "title": "ID польлзователя (админ)",
+                        "description": "id пользователя ответившего на обращение.",
+                        "type": "integer",
+                        "format": "integer",
+                        "example": "1"
+                    },
+                    "created_at": {
+                        "title": "создание обращения",
+                        "description": "Дата создания обращения пользователя",
+                        "format": "datetime",
+                        "example": "2021-12-21 21:21:21"
+                    },
+                    "updated_at": {
+                        "title": "обновление записи обращения",
+                        "description": "дата последнего обновления записи.",
+                        "format": "datetime",
+                        "example": "2021-12-21 21:21:21"
+                    },
+                    "deleted_at": {
+                        "title": "удаление обращения",
+                        "description": "Мягкое удаление, записывается дата удаления обращения",
+                        "format": "datetime",
+                        "example": "2021-12-21 21:21:21"
+                    },
+                    "user": {
+                        "title": "администратор",
+                        "description": "пользователь - администратор, который пищет ответ на обращение."
+                    }
+                },
+                "type": "object",
+                "xml": {
+                    "name": "Question"
+                }
             }
         },
         "securitySchemes": {
-            "X-CSRF-TOKEN": {
+            "TOKEN": {
                 "type": "apiKey",
-                "name": "X-CSRF-TOKEN",
+                "description": "Этот контроллер создан исключительно для документаций и ни где не будет использоваться в проекте.",
+                "name": "TOKEN",
                 "in": "header"
             }
         }
     },
     "tags": [
         {
-            "name": "Questions",
-            "description": "Раздел создания обращения, ответа пользователю, обновление и удаления."
-        },
-        {
             "name": "Auth Api",
             "description": "API: Регистрация, вход, выход получение и удаление токена."
+        },
+        {
+            "name": "Questions",
+            "description": "Раздел создания обращения, ответа пользователю, обновление и удаления."
         }
     ],
     "security": [

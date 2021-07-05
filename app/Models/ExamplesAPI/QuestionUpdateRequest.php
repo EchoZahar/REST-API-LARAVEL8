@@ -20,4 +20,16 @@ class QuestionUpdateRequest
      * )
      */
     public $comment;
+
+    /**
+     * @var int
+     *
+     * @OA\Property(
+     *      title="User ID",
+     *      description="Авторизированный пользователь",
+     *      format="int64",
+     *      example=1
+     * )
+     */
+    public $user_id;
 }

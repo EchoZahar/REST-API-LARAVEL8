@@ -6,10 +6,15 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
+    public function registerForm()
+    {
+        return view('auth.register');
+    }
     /**
      * @param Request $request
      * validate request data
@@ -19,41 +24,20 @@ class AuthController extends Controller
      * @return \Illuminate\Http\Response
      *
      * @OA\Post(
-     *      path="/register",
-     *      operationId="RegisterNewUser",
-     *      tags={"Auth Api"},
-     *      summary="Register new user",
-     *      description="Returns question data",
-     *      @OA\Parameter(
-     *         description="enter your email",
-     *         name="email",
-     *         in="query",
-     *         @OA\Schema(
-     *             type="string",
-     *         )
-     *     ),
-     *     @OA\Parameter(
-     *         description="enter your eamil",
-     *         name="email",
-     *         in="query",
-     *         @OA\Schema(
-     *             type="string",
-     *         )
-     *     ),
-     *     @OA\Parameter(
-     *         description="enter your password",
-     *         name="password",
-     *         in="query",
-     *         @OA\Schema(
-     *             type="text",
-     *         )
-     *     ),
+     *     path="/register",
+     *     tags={"Auth Api"},
+     *     summary="Регистрация нового пользователя",
+     *     description="",
+     *     @OA\RequestBody (
+     *          required=true,
+     *          @OA\JsonContent(ref="#/components/schemas/AuthRegister")
+     *      ),
      *      @OA\RequestBody(
      *          required=true,
      *      ),
      *      @OA\Response(
      *          response=201,
-     *          description="Successful registration",
+     *          description="Пользователь успешно зарегестрирован",
      *       ),
      *      @OA\Response(
      *          response=400,
@@ -89,6 +73,11 @@ class AuthController extends Controller
         return response($response, 201);
     }
 
+    public function loginForm()
+    {
+        return view('auth.login');
+    }
+
     /**
      * @param Request $request
      * @return \Illuminate\Contracts\Foundation\Application
@@ -99,28 +88,11 @@ class AuthController extends Controller
      * get token this user
      * @OA\Post(
      *     path="/login",
-     *     operationId="LoginUser",
      *     tags={"Auth Api"},
-     *     summary="login user",
-     *     description="Returns question data",
-     *     @OA\Parameter(
-     *         description="enter your eamil",
-     *         name="email",
-     *         in="query",
-     *         @OA\Schema(
-     *             type="string",
-     *         )
-     *     ),
-     *     @OA\Parameter(
-     *         description="enter your password",
-     *         name="password",
-     *         in="query",
-     *         @OA\Schema(
-     *             type="password",
-     *         )
-     *     ),
-     *      @OA\RequestBody(
+     *     summary="Авторизация пользователя",
+     *     @OA\RequestBody (
      *          required=true,
+     *          @OA\JsonContent(ref="#/components/schemas/AuthLoginRequest")
      *      ),
      *      @OA\Response(
      *          response=201,
@@ -173,9 +145,6 @@ class AuthController extends Controller
      *     tags={"Auth Api"},
      *     summary="logout user",
      *     description="Returns question data",
-     *     @OA\RequestBody(
-     *          required=true,
-     *     ),
      *     @OA\Response(
      *          response=201,
      *          description="Successful registration",
@@ -193,6 +162,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         auth()->user()->tokens()->delete();
+        Auth::logout();
         return ['message' => 'logged out'];
     }
 }

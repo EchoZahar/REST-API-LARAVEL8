@@ -29,16 +29,16 @@ class QuestionController extends ApiController
      *         )
      *     ),
      *      @OA\Response (
+     *          response="200",
+     *          description="Успешно загружено."
+     *      ),
+     *      @OA\Response (
      *          response=403,
      *          description="Forbidden"
      *      ),
      *      @OA\Response (
      *          response=404,
      *          description="not found"
-     *      ),
-     *      @OA\Response (
-     *          response="200",
-     *          description="An example resource"
      *      ),
      * )
      * Display a listing of the resource.
@@ -47,7 +47,7 @@ class QuestionController extends ApiController
     public function index(Request $request)
     {
 //        return $this->filter($request);
-        return Question::latest()->simplePaginate(2);
+        return Question::with('user')->latest()->simplePaginate(2);
     }
 
     /**
@@ -63,15 +63,12 @@ class QuestionController extends ApiController
      *     summary="Сохранение новой заявки от пользователя",
      *     @OA\RequestBody (
      *          required=true,
-     *          @OA\JsonContent(ref="#/components/schemas/QuestionStoreRequest")
+     *          @OA\JsonContent (ref="#/components/schemas/QuestionStoreRequest")
      *      ),
-     *      @OA\Response(
-     *          response=200,
-     *          description="Обращение успешно добавлено.",
-     *       ),
      *     @OA\Response(
      *          response=201,
      *          description="Обращение успешно добавлено.",
+     *          @OA\JsonContent (ref="#/components/schemas/Questions")
      *       ),
      *      @OA\Response(
      *          response=400,
@@ -80,11 +77,7 @@ class QuestionController extends ApiController
      *      @OA\Response(
      *          response=403,
      *          description="Forbidden"
-     *      ),
-     *      @OA\Response(
-     *          response=419,
-     *          description="Undocumented, стек срок действия страницы.",
-     *       )
+     *      )
      * )
      */
     public function store(QuestionStoreRequest $request)
@@ -117,24 +110,24 @@ class QuestionController extends ApiController
      *          description="Question ID",
      *          required=true,
      *          in="path",
-     *          @OA\Schema(
+     *          @OA\Schema (
      *              type="integer"
      *          )
      *      ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Что то, пошло не так, записи не нсйдено.",
-     *     ),
-     *     @OA\Response(
-     *          response="default",
+     *     @OA\Response (
      *          response="200",
-     *          description="Данные успешно, загружены."
+     *          description="Данные успешно, загружены.",
+     *          @OA\JsonContent (ref="#/components/schemas/Questions")
+     *     ),
+     *     @OA\Response (
+     *         response=404,
+     *         description="Что то, пошло не так, записи не нaйдено.",
      *     )
      * )
      */
-    public function show($id)
+    public function show(int $id)
     {
-        $question = Question::find($id);
+        $question = Question::with('user')->find($id);
         if (!$question) {
             return response(['message' => 'не найдено !'], 404);
         }
@@ -145,7 +138,9 @@ class QuestionController extends ApiController
      * Update the specified resource in storage.
      *
      * @param Request $request
+     *
      * @param int $id
+     *
      * @return Response
      *
      * @OA\Put (
@@ -153,14 +148,7 @@ class QuestionController extends ApiController
      *     operationId="questionUpdate",
      *     tags={"Questions"},
      *     summary="Обновление записи. Добавить ответ от администратора",
-     *     security={
-     *          {"api_id": {}},
-     *     },
-     *     @OA\RequestBody(
-     *          required=true,
-     *          @OA\JsonContent(ref="#/components/schemas/QuestionUpdateRequest")
-     *      ),
-     *     @OA\Parameter(
+     *     @OA\Parameter (
      *          name="id",
      *          description="Метод обновления, по id записи.",
      *          required=true,
@@ -169,52 +157,54 @@ class QuestionController extends ApiController
      *              type="integer"
      *          )
      *      ),
-     *     @OA\Response(
-     *          response=200,
-     *          description="Обращение успешно добавлено.",
-     *       ),
-     *      @OA\Response(
+     *     @OA\RequestBody (
+     *          required=true,
+     *          @OA\JsonContent(ref="#/components/schemas/QuestionUpdateRequest")
+     *      ),
+     *      @OA\Response (
      *          response=202,
      *          description="Запись успешно обновлена",
      *       ),
-     *      @OA\Response(
+     *       @OA\Response (
      *          response=400,
      *          description="Bad Request"
      *      ),
-     *      @OA\Response(
+     *      @OA\Response (
      *          response=401,
-     *          description="не авторизован",
+     *          description="не авторизован"
      *      ),
-     *      @OA\Response(
+     *      @OA\Response (
      *          response=403,
      *          description="Forbidden"
      *      ),
-     *      @OA\Response(
+     *      @OA\Response (
      *          response=404,
      *          description="Что то пошло не так, запись не найдена."
      *      ),
-     *     @OA\Response(
+     *      @OA\Response (
      *          response=419,
-     *          description="Undocumented, стек срок действия страницы.",
-     *       )
+     *          description="Что то пошло не так!"
+     *      )
      * )
      */
-    public function update(QuestionUpdateRequest $request, $id)
+    public function update(QuestionUpdateRequest $request,int $id)
     {
         $question = Question::find($id);
         if (!$question) {
             return response(['message' => 'не найдено !'], 404);
         }
         $data = $request->only('comment');
-        if ($data != null) {
-            $data['user_id'] = auth()->user()->id;
+        if ($data['comment'] != null) {
             $data['status'] = Question::RESOLVED;
             $question->dateTime = Carbon::now();
         }
+        if (!$request->input('user_id')) {
+            $data['user_id'] = auth()->user()->id;
+        }
         $question->update($data);
         Mail::to($question->email)->send(new SendQuestionMail($question));
-//        return response($question, 200);
-        return [$question, ['message' => 'Запись успешно обновлена, email отправлен пользователю !']];
+        return response([$question, ['message' => 'Запись успешно обновлена, email отправлен пользователю !']], 200);
+//        return [$question, ['message' => 'Запись успешно обновлена, email отправлен пользователю !']];
     }
 
     /**
@@ -228,12 +218,9 @@ class QuestionController extends ApiController
      *     operationId="destroy",
      *     tags={"Questions"},
      *     summary="Мягкое удаление (из БД не удаляется) обращения",
-     *     security={
-     *         {"api_id": {}},
-     *     },
      *     @OA\Parameter (
      *         name="id",
-     *         description="Question id",
+     *         description="Введите id записи для удаления",
      *         required=true,
      *         in="path",
      *         @OA\Schema (
@@ -242,8 +229,7 @@ class QuestionController extends ApiController
      *     ),
      *     @OA\Response (
      *         response=204,
-     *         description="Запись успешно удалена",
-     *         @OA\JsonContent()
+     *         description="Запись успешно удалена"
      *      ),
      *     @OA\Response (
      *         response=401,
@@ -259,14 +245,14 @@ class QuestionController extends ApiController
      *     )
      * )
      */
-    public function destroy($id)
+    public function destroy(int $id)
     {
         $question = Question::find($id);
         if (!$question) {
             return response(['message' => 'не найдено !'], 404);
         }
-        $question->destroy($id);
-        return response($question, 200);
+        $question->delete();
+        return response(null, 204);
     }
 
     /**
