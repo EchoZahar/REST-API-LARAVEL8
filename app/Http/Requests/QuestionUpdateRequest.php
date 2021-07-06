@@ -31,7 +31,7 @@ class QuestionUpdateRequest extends FormRequest
 //            'status'    => ['required', Rule::In(Question::$types)],
             'dateStart' => ['nullable', 'date'],
             'comment' => ['required', 'min:5', 'max:500'],
-            'user_id' => ['nullable', 'integer']
+            'user_id' => ['required', 'integer']
         ];
     }
 }

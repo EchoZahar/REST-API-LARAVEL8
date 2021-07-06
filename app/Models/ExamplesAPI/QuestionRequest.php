@@ -4,9 +4,9 @@ namespace App\Models\ExamplesAPI;
 
 /**
  * @OA\Schema (
- *     description="Получение всех записей, обращений, структура таблицы.",
- *     type="object",
- *     title="Обращения пользователей."
+ *     title="Получение данных.",
+ *     description="Получить входящие данные из request метода.",
+ *     type="object"
  * )
  */
 class QuestionRequest

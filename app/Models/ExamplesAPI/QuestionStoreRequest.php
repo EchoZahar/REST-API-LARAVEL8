@@ -4,9 +4,10 @@ namespace App\Models\ExamplesAPI;
 
 /**
  * @OA\Schema (
+ *     title="Сохранение обращения пользователя.",
  *     description="создание новой записи, заявка от пользователя.",
  *     type="object",
- *     title="Сохранение обращения пользователя."
+ *     required={"name", "email", "message"}
  * )
  */
 class QuestionStoreRequest
@@ -28,7 +29,7 @@ class QuestionStoreRequest
      *
      * @OA\Property (
      *     title="email пользователя.",
-     *     description="email пользователя. Обязателеное поле, минимальная длина 5, максимальная 100. ",
+     *     description="email пользователя. Обязателеное поле, минимальная длина 5, максимальная 100.",
      *     format="string",
      *     example="customer@example.com"
      * )
