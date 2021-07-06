@@ -20,7 +20,7 @@ class ApiController extends Controller
      *      )
      * )
      * @OA\Server (
-     *     url="/api/",
+     *     url=L5_SWAGGER_CONST_HOST,
      *     description="Demo tech task API server"
      * )
      *
@@ -35,8 +35,8 @@ class ApiController extends Controller
      * @OA\SecurityScheme (
      *     type="apiKey",
      *     in="header",
-     *     name="TOKEN",
-     *     securityScheme="TOKEN"
+     *     name="X-APP-ID",
+     *     securityScheme="X-APP-ID"
      * )
      */
 }

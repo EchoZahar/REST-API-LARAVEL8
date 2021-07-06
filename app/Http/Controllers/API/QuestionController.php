@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Http\Requests\FilterRequest;
 use App\Http\Requests\QuestionStoreRequest;
 use App\Http\Requests\QuestionUpdateRequest;
 use App\Mail\NewQuestionMail;
@@ -21,33 +22,98 @@ class QuestionController extends ApiController
      *     tags={"Questions"},
      *     summary="Получение всех обращении с использоваение простой пагинаций, по 3 обращения (simplePaginate(3))",
      *     @OA\Parameter (
-     *         description="Пагинация по страницам",
-     *         name="page",
+     *        description="Пагинация по страницам",
+     *        name="page",
+     *        in="query",
+     *        @OA\Schema (
+     *            type="integer",
+     *        )
+     *     ),
+     *     @OA\Parameter (
+     *         description="фильтр по статусу",
+     *         name="status",
      *         in="query",
      *         @OA\Schema (
-     *             type="integer",
-     *         )
+     *             type="string",
+     *          ),
      *     ),
-     *      @OA\Response (
-     *          response="200",
-     *          description="Успешно загружено."
-     *      ),
-     *      @OA\Response (
-     *          response=403,
-     *          description="Forbidden"
-     *      ),
-     *      @OA\Response (
-     *          response=404,
-     *          description="not found"
-     *      ),
+     *     @OA\Parameter (
+     *         description="выбрать обращения по дате (формат: 2021-12-21) с: ",
+     *         name="dateStart",
+     *         in="query",
+     *         @OA\Schema (
+     *             type="date",
+     *          ),
+     *     ),
+     *     @OA\Parameter (
+     *         description="выбрать обращения по дате (формат: 2021-12-21) по:",
+     *         name="dateEnd",
+     *         in="query",
+     *         @OA\Schema (
+     *             type="date",
+     *          ),
+     *     ),
+     *     @OA\Response (
+     *         response="200",
+     *         description="Успешно загружено."
+     *     ),
+     *     @OA\Response (
+     *         response=403,
+     *         description="Forbidden"
+     *     ),
+     *     @OA\Response (
+     *         response=404,
+     *         description="not found"
+     *     ),
      * )
      * Display a listing of the resource.
      * @return Response
      */
-    public function index(Request $request)
+    public function index(FilterRequest $request)
     {
-//        return $this->filter($request);
-        return Question::with('user')->latest()->simplePaginate(2);
+        /**
+         * возвращает загрузку модели
+         * все методы можно посмотреть через: dd(get_class_methods($request));
+         */
+        $filter = Question::query();
+
+        /**
+         * фильтрация по статусу
+         */
+        if ($request->filled('status') != null) {
+            $filter->where('status', '=', $request->status);
+        }
+
+        /**
+         * фильтрация по дате c ...
+         */
+        if ($request->filled('dateStart')) {
+            $filter->whereDate('created_at', '>=', $request->input('dateStart'));
+        }
+
+        /**
+         * фильтрация по дате до ...
+         */
+        if ($request->filled('dateEnd')) {
+            $filter->whereDate('created_at', '<=', $request->input('dateEnd'));
+        }
+
+        /**
+         * заявки в диапозоне от и до выбранной даты.
+         */
+        if ($request->filled('dateStart') && $request->filled('dateEnd')) {
+            $filter->whereDate('created_at', '>=', $request->input('dateStart'))
+                ->whereDate('created_at', '<=', $request->input('dateEnd'));
+        }
+
+        /**
+         * метод simplePaginate(), возвращает количество записей на страницу
+         * ->withPath('?' . $request->getQueryString()) - принимает значение фильтров,
+         * метод getQueryString() добавляет параметр в пагинацию
+         * переход по страницам отфильтрованных данных
+         */
+        $questions = $filter->latest()->simplePaginate(3)->withPath('?' . $request->getQueryString());
+        return $questions;
     }
 
     /**
@@ -57,27 +123,27 @@ class QuestionController extends ApiController
      * @return Response
      *
      * @OA\Post (
-     *     path="/questions",
-     *     operationId="storeQuestion",
+     *     path="/questions/store",
+     *     operationId="store",
      *     tags={"Questions"},
      *     summary="Сохранение новой заявки от пользователя",
      *     @OA\RequestBody (
-     *          required=true,
-     *          @OA\JsonContent (ref="#/components/schemas/QuestionStoreRequest")
+     *         required=true,
+     *         @OA\JsonContent (ref="#/components/schemas/QuestionStoreRequest")
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Обращение успешно добавлено.",
+     *         @OA\JsonContent (ref="#/components/schemas/QuestionRequest")
      *      ),
      *     @OA\Response(
-     *          response=201,
-     *          description="Обращение успешно добавлено.",
-     *          @OA\JsonContent (ref="#/components/schemas/Questions")
-     *       ),
-     *      @OA\Response(
-     *          response=400,
-     *          description="Bad Request"
-     *      ),
-     *      @OA\Response(
-     *          response=403,
-     *          description="Forbidden"
-     *      )
+     *         response=400,
+     *         description="Bad Request"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden"
+     *     )
      * )
      */
     public function store(QuestionStoreRequest $request)
@@ -101,23 +167,22 @@ class QuestionController extends ApiController
      * @return Response
      *
      * @OA\Get (
-     *      path="/questions/{id}",
-     *      operationId="getQuestionById",
-     *      tags={"Questions"},
-     *      summary="Показать запись по id",
-     *      @OA\Parameter (
-     *          name="id",
-     *          description="Question ID",
-     *          required=true,
-     *          in="path",
-     *          @OA\Schema (
-     *              type="integer"
-     *          )
+     *     path="/questions/show/{question_id}",
+     *     operationId="show",
+     *     tags={"Questions"},
+     *     summary="Показать запись по id",
+     *     @OA\Parameter (
+     *         name="question_id",
+     *         description="ID обращения",
+     *         required=true,
+     *         in="path",
+     *         @OA\Schema (
+     *             type="integer"
+     *         )
      *      ),
      *     @OA\Response (
-     *          response="200",
-     *          description="Данные успешно, загружены.",
-     *          @OA\JsonContent (ref="#/components/schemas/Questions")
+     *         response=200,
+     *         description="Данные успешно, загружены."
      *     ),
      *     @OA\Response (
      *         response=404,
@@ -125,9 +190,9 @@ class QuestionController extends ApiController
      *     )
      * )
      */
-    public function show(int $id)
+    public function show($question_id)
     {
-        $question = Question::with('user')->find($id);
+        $question = Question::with('user')->find($question_id);
         if (!$question) {
             return response(['message' => 'не найдено !'], 404);
         }
@@ -144,56 +209,61 @@ class QuestionController extends ApiController
      * @return Response
      *
      * @OA\Put (
-     *     path="/questions/{id}",
-     *     operationId="questionUpdate",
+     *     path="/questions/update/{id}",
+     *     operationId="update",
      *     tags={"Questions"},
-     *     summary="Обновление записи. Добавить ответ от администратора",
+     *     summary="Обновление записи.",
+     *     security={
+     *         {"app_id": {}},
+     *     },
+     *     description="Получение ответа на обращение от администратора.",
      *     @OA\Parameter (
-     *          name="id",
-     *          description="Метод обновления, по id записи.",
-     *          required=true,
-     *          in="path",
-     *          @OA\Schema(
-     *              type="integer"
-     *          )
-     *      ),
+     *         name="id",
+     *         description="Введите id обращения.",
+     *         required=true,
+     *         in="path",
+     *         @OA\Schema(
+     *             type="integer"
+     *         )
+     *     ),
      *     @OA\RequestBody (
-     *          required=true,
-     *          @OA\JsonContent(ref="#/components/schemas/QuestionUpdateRequest")
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/QuestionUpdateRequest")
+     *     ),
+     *     @OA\Response (
+     *         response=202,
+     *         description="Запись успешно обновлена",
+     *         @OA\JsonContent(ref="#/components/schemas/Questions")
      *      ),
      *      @OA\Response (
-     *          response=202,
-     *          description="Запись успешно обновлена",
-     *       ),
-     *       @OA\Response (
-     *          response=400,
-     *          description="Bad Request"
+     *         response=400,
+     *         description="Bad Request"
      *      ),
      *      @OA\Response (
-     *          response=401,
-     *          description="не авторизован"
+     *         response=401,
+     *         description="не авторизован"
      *      ),
      *      @OA\Response (
-     *          response=403,
-     *          description="Forbidden"
+     *         response=403,
+     *         description="Forbidden"
      *      ),
      *      @OA\Response (
-     *          response=404,
-     *          description="Что то пошло не так, запись не найдена."
+     *         response=404,
+     *         description="Что то пошло не так, запись не найдена."
      *      ),
      *      @OA\Response (
-     *          response=419,
-     *          description="Что то пошло не так!"
+     *         response=419,
+     *         description="Что то пошло не так!"
      *      )
      * )
      */
-    public function update(QuestionUpdateRequest $request,int $id)
+    public function update(QuestionUpdateRequest $request, $id)
     {
         $question = Question::find($id);
         if (!$question) {
             return response(['message' => 'не найдено !'], 404);
         }
-        $data = $request->only('comment');
+        $data = $request->only('comment', 'user_id');
         if ($data['comment'] != null) {
             $data['status'] = Question::RESOLVED;
             $question->dateTime = Carbon::now();
@@ -203,8 +273,7 @@ class QuestionController extends ApiController
         }
         $question->update($data);
         Mail::to($question->email)->send(new SendQuestionMail($question));
-        return response([$question, ['message' => 'Запись успешно обновлена, email отправлен пользователю !']], 200);
-//        return [$question, ['message' => 'Запись успешно обновлена, email отправлен пользователю !']];
+        return [$question, ['message' => 'Запись успешно обновлена, email отправлен пользователю !']];
     }
 
     /**
@@ -214,18 +283,20 @@ class QuestionController extends ApiController
      * @return Response
      *
      * @OA\Delete (
-     *     path="/questions/{id}",
-     *     operationId="destroy",
-     *     tags={"Questions"},
-     *     summary="Мягкое удаление (из БД не удаляется) обращения",
+     *      path="/questions/delete/{id}",
+     *      operationId="destroy",
+     *      tags={"Questions"},
+     *      summary="Удаление обращения",
+     *      security={
+     *         {"app_id": {}},
+     *      },
+     *     description="Мягкое удаление (без удаления из БД), возвращается пустой массив.",
      *     @OA\Parameter (
      *         name="id",
-     *         description="Введите id записи для удаления",
+     *         description="Введите id обращения для удаления",
      *         required=true,
      *         in="path",
-     *         @OA\Schema (
-     *             type="integer"
-     *         )
+     *         @OA\Schema (type="integer")
      *     ),
      *     @OA\Response (
      *         response=204,
@@ -233,7 +304,7 @@ class QuestionController extends ApiController
      *      ),
      *     @OA\Response (
      *         response=401,
-     *         description="Unauthenticated",
+     *         description="Unauthenticated"
      *     ),
      *     @OA\Response (
      *         response=403,
@@ -245,7 +316,7 @@ class QuestionController extends ApiController
      *     )
      * )
      */
-    public function destroy(int $id)
+    public function destroy($id)
     {
         $question = Question::find($id);
         if (!$question) {
@@ -273,12 +344,12 @@ class QuestionController extends ApiController
      *          ),
      *     ),
      *     @OA\Response (
-     *          response=404,
-     *          description="не найдено"
+     *         response=404,
+     *         description="не найдено"
      *     ),
      *     @OA\Response (
-     *          response="200",
-     *          description="статус 'ОК'"
+     *         response="200",
+     *         description="статус 'ОК'"
      *     ),
      * )
      */

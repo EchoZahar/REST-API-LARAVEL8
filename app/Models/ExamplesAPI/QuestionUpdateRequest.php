@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Models\ExamplesAPI;
+
 /**
  * @OA\Schema (
  *     description="Обновление записи, заявка от пользователя",
@@ -25,9 +27,9 @@ class QuestionUpdateRequest
      * @var int
      *
      * @OA\Property(
-     *      title="User ID",
-     *      description="Авторизированный пользователь",
-     *      format="int64",
+     *      title="укажите id пользователя",
+     *      description="поле integer 1,2,3",
+     *      format="integer",
      *      example=1
      * )
      */

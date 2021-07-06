@@ -25,7 +25,7 @@ class Questions
      *     example=1
      * )
      */
-    private $id;
+    public $id;
 
     /**
      * @var string

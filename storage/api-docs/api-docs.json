@@ -13,7 +13,7 @@
     },
     "servers": [
         {
-            "url": "/api/",
+            "url": "http://127.0.0.1:8000/api/",
             "description": "Demo tech task API server"
         }
     ],
@@ -115,6 +115,30 @@
                         "schema": {
                             "type": "integer"
                         }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "фильтр по статусу",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "dateStart",
+                        "in": "query",
+                        "description": "выбрать обращения по дате (формат: 2021-12-21) с: ",
+                        "schema": {
+                            "type": "date"
+                        }
+                    },
+                    {
+                        "name": "dateEnd",
+                        "in": "query",
+                        "description": "выбрать обращения по дате (формат: 2021-12-21) по:",
+                        "schema": {
+                            "type": "date"
+                        }
                     }
                 ],
                 "responses": {
@@ -128,14 +152,16 @@
                         "description": "not found"
                     }
                 }
-            },
+            }
+        },
+        "/questions/store": {
             "post": {
                 "tags": [
                     "Questions"
                 ],
                 "summary": "Сохранение новой заявки от пользователя",
                 "description": "Store a newly created resource in storage.",
-                "operationId": "storeQuestion",
+                "operationId": "store",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -152,7 +178,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Questions"
+                                    "$ref": "#/components/schemas/QuestionRequest"
                                 }
                             }
                         }
@@ -166,19 +192,19 @@
                 }
             }
         },
-        "/questions/{id}": {
+        "/questions/show/{question_id}": {
             "get": {
                 "tags": [
                     "Questions"
                 ],
                 "summary": "Показать запись по id",
                 "description": "Display the specified resource.",
-                "operationId": "getQuestionById",
+                "operationId": "show",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "question_id",
                         "in": "path",
-                        "description": "Question ID",
+                        "description": "ID обращения",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -187,32 +213,27 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Данные успешно, загружены.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Questions"
-                                }
-                            }
-                        }
+                        "description": "Данные успешно, загружены."
                     },
                     "404": {
                         "description": "Что то, пошло не так, записи не нaйдено."
                     }
                 }
-            },
+            }
+        },
+        "/questions/update/{id}": {
             "put": {
                 "tags": [
                     "Questions"
                 ],
-                "summary": "Обновление записи. Добавить ответ от администратора",
-                "description": "Update the specified resource in storage.",
-                "operationId": "questionUpdate",
+                "summary": "Обновление записи.",
+                "description": "Получение ответа на обращение от администратора.",
+                "operationId": "update",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Метод обновления, по id записи.",
+                        "description": "Введите id обращения.",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -231,7 +252,14 @@
                 },
                 "responses": {
                     "202": {
-                        "description": "Запись успешно обновлена"
+                        "description": "Запись успешно обновлена",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Questions"
+                                }
+                            }
+                        }
                     },
                     "400": {
                         "description": "Bad Request"
@@ -248,20 +276,27 @@
                     "419": {
                         "description": "Что то пошло не так!"
                     }
-                }
-            },
+                },
+                "security": [
+                    {
+                        "app_id": []
+                    }
+                ]
+            }
+        },
+        "/questions/delete/{id}": {
             "delete": {
                 "tags": [
                     "Questions"
                 ],
-                "summary": "Мягкое удаление (из БД не удаляется) обращения",
-                "description": "Remove the specified resource from storage.",
+                "summary": "Удаление обращения",
+                "description": "Мягкое удаление (без удаления из БД), возвращается пустой массив.",
                 "operationId": "destroy",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Введите id записи для удаления",
+                        "description": "Введите id обращения для удаления",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -281,7 +316,12 @@
                     "404": {
                         "description": "Что то пошло не так, запись не найдена."
                     }
-                }
+                },
+                "security": [
+                    {
+                        "app_id": []
+                    }
+                ]
             }
         },
         "/questions/search/{name}": {
@@ -370,9 +410,34 @@
                 },
                 "type": "object"
             },
+            "QuestionFilterRequest": {
+                "title": "Фильтрация обращении.",
+                "description": "фильтрация по имени, по дате, выбоор даты, по статусу.",
+                "properties": {
+                    "name": {
+                        "title": "имя пользователя",
+                        "description": "Нужно ввести имя пользователя. Обязательное поле, минимальная длина 2, максимальное 50.",
+                        "type": "string",
+                        "format": "string",
+                        "example": "Customer"
+                    },
+                    "status": {
+                        "title": "Статус",
+                        "description": "фильтрация по статусу.",
+                        "type": "string",
+                        "format": "string",
+                        "enum": [
+                            "active",
+                            "resolved"
+                        ],
+                        "example": "active, resolved"
+                    }
+                },
+                "type": "object"
+            },
             "QuestionRequest": {
-                "title": "Обращения пользователей.",
-                "description": "Получение всех записей, обращений, структура таблицы.",
+                "title": "Получение данных.",
+                "description": "Получить входящие данные из request метода.",
                 "properties": {
                     "data": {
                         "$ref": "#/components/schemas/Questions"
@@ -383,6 +448,11 @@
             "QuestionStoreRequest": {
                 "title": "Сохранение обращения пользователя.",
                 "description": "создание новой записи, заявка от пользователя.",
+                "required": [
+                    "name",
+                    "email",
+                    "message"
+                ],
                 "properties": {
                     "name": {
                         "title": "имя пользователя",
@@ -393,7 +463,7 @@
                     },
                     "email": {
                         "title": "email пользователя.",
-                        "description": "email пользователя. Обязателеное поле, минимальная длина 5, максимальная 100. ",
+                        "description": "email пользователя. Обязателеное поле, минимальная длина 5, максимальная 100.",
                         "type": "string",
                         "format": "string",
                         "example": "customer@example.com"
@@ -420,10 +490,10 @@
                         "example": "какой то, текст."
                     },
                     "user_id": {
-                        "title": "User ID",
-                        "description": "Авторизированный пользователь",
+                        "title": "укажите id пользователя",
+                        "description": "поле integer 1,2,3",
                         "type": "integer",
-                        "format": "int64",
+                        "format": "integer",
                         "example": 1
                     }
                 },
@@ -514,10 +584,10 @@
             }
         },
         "securitySchemes": {
-            "TOKEN": {
+            "X-APP-ID": {
                 "type": "apiKey",
                 "description": "Этот контроллер создан исключительно для документаций и ни где не будет использоваться в проекте.",
-                "name": "TOKEN",
+                "name": "X-APP-ID",
                 "in": "header"
             }
         }

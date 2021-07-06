@@ -15,7 +15,8 @@ use App\Http\Controllers\API\AuthController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+//    return view('welcome');
+    return redirect()->route('l5-swagger.default.api');
 });
 Route::get('/register', [AuthController::class, 'registerForm'])->name('register');
 Route::get('/login', [AuthController::class, 'loginForm'])->name('login');
