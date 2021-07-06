@@ -16,18 +16,6 @@ class QuestionFilterRequest
      * @var string
      *
      * @OA\Property (
-     *     title="имя пользователя",
-     *     description="Нужно ввести имя пользователя. Обязательное поле, минимальная длина 2, максимальное 50.",
-     *     format="string",
-     *     example="Customer"
-     * )
-     */
-    public $name;
-
-    /**
-     * @var string
-     *
-     * @OA\Property (
      *     title="Статус",
      *     description="фильтрация по статусу.",
      *     enum={"active", "resolved"},
@@ -39,19 +27,26 @@ class QuestionFilterRequest
 
     /**
      * @var string
-     */
-
-    public $dateAsc;
-    /**
-     * @var string
+     *
+     * @OA\Property (
+     *     title="Фильтр по дате",
+     *     description="Фильтрация по дате начиная с:",
+     *     format="date",
+     *     example="2021-12-02"
+     * )
      */
 
     public $dateStart;
 
     /**
      * @var string
+     *
+     * @OA\Property (
+     *     title="Фильтр по дате",
+     *     description="Фильтрация по дате, ДО введеной даты:",
+     *     format="date",
+     *     example="2021-12-02"
+     * )
      */
     public $dateEnd;
-
-
 }

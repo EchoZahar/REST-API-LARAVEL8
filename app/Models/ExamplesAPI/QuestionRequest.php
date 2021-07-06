@@ -12,7 +12,7 @@ namespace App\Models\ExamplesAPI;
 class QuestionRequest
 {
     /**
-     * @var \App\Models\ExamplesAPI\Questions
+     * @var Questions
      *
      * @OA\Property (
      *     title="Данные по обращениям.",
