@@ -270,6 +270,9 @@ class QuestionController extends ApiController
         }
         if (!$request->input('user_id')) {
             $data['user_id'] = auth()->user()->id;
+            if (!$data['user_id']) {
+                return response(['error' => "Forbidden"]);
+            }
         }
         $question->update($data);
         Mail::to($question->email)->send(new SendQuestionMail($question));
@@ -356,81 +359,5 @@ class QuestionController extends ApiController
     public function search($name)
     {
         return Question::where('name', 'like', '%' . $name . '%')->get();
-    }
-
-    /**
-     * @param Request $request
-     * @return mixed
-     * Фильтр метод GET on index page
-     * Если необходимо можно перенести в отдельный репозитории
-     * данный метод будет использоваться на главной странице (если будет)
-     */
-    public function filter(Request $request)
-    {
-        $status = [
-            'активные' => Question::ACTIVE,
-            'завершеные' => Question::RESOLVED,
-        ];
-        /**
-         * возвращает загрузку модели
-         * все методы можно посмотреть через: dd(get_class_methods($request));
-         */
-        $filter = Question::query();
-
-        /**
-         * фильтрация по статусу
-         */
-        if ($request->filled('status') != null) {
-            $filter->where('status', '=', $request->status);
-        }
-
-        /**
-         * фильтрация по возрастанию даты
-         */
-        if ($request->filled('dateAsc') && $request->input('dateAsc') == 'on') {
-            $filter->orderBy('id', 'asc');
-        }
-
-        /**
-         * фильтрация по убыванию даты
-         */
-        if ($request->filled('dateDesc') && $request->input('dateDesc') == 'on') {
-            $filter->orderBy('id', 'desc');
-        }
-
-        if ($request->filled('dateDesc') && $request->filled('dateAsc')) {
-            $filter->orderBy('id', 'desc');
-        }
-
-        /**
-         * фильтрация по дате c ...
-         */
-        if ($request->filled('dateStart')) {
-            $filter->whereDate('created_at', '>=', $request->input('dateStart'));
-        }
-
-        /**
-         * фильтрация по дате до ...
-         */
-        if ($request->filled('dateEnd')) {
-            $filter->whereDate('created_at', '<=', $request->input('dateEnd'));
-        }
-
-        /**
-         * заявки в диапозоне от и до выбранной даты.
-         */
-        if ($request->filled('dateStart') && $request->filled('dateEnd')) {
-            $filter->whereDate('created_at', '>=', $request->input('dateStart'))
-                ->whereDate('created_at', '<=', $request->input('dateEnd'));
-        }
-
-        /**
-         * метод simplePaginate(), возвращает количество записей на страницу
-         * ->withPath('?' . $request->getQueryString()) - принимает значение фильтров,
-         * метод getQueryString() добавляет параметр в пагинацию
-         * переход по страницам отфильтрованных данных
-         */
-        $questions = $filter->latest()->simplePaginate(10)->withPath('?' . $request->getQueryString());
-        return $questions;
     }
 }

@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,7 +15,6 @@ use App\Http\Controllers\API\AuthController;
 */
 
 Route::get('/', function () {
-//    return view('welcome');
     return redirect()->route('l5-swagger.default.api');
 });
 Route::get('/register', [AuthController::class, 'registerForm'])->name('register');

@@ -24,11 +24,6 @@ class QuestionUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-//            'name'      => ['required', 'max:50'],
-//            'email'     => ['required', 'email', 'min:5', 'max:100'],
-//            'message'   => ['required', 'min:5', 'max:2000'],
-            // только зарегастрированный пользователь
-//            'status'    => ['required', Rule::In(Question::$types)],
             'dateStart' => ['nullable', 'date'],
             'comment' => ['required', 'min:5', 'max:500'],
             'user_id' => ['required', 'integer']

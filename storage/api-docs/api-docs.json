@@ -414,13 +414,6 @@
                 "title": "Фильтрация обращении.",
                 "description": "фильтрация по имени, по дате, выбоор даты, по статусу.",
                 "properties": {
-                    "name": {
-                        "title": "имя пользователя",
-                        "description": "Нужно ввести имя пользователя. Обязательное поле, минимальная длина 2, максимальное 50.",
-                        "type": "string",
-                        "format": "string",
-                        "example": "Customer"
-                    },
                     "status": {
                         "title": "Статус",
                         "description": "фильтрация по статусу.",
@@ -431,6 +424,20 @@
                             "resolved"
                         ],
                         "example": "active, resolved"
+                    },
+                    "dateStart": {
+                        "title": "Фильтр по дате",
+                        "description": "Фильтрация по дате начиная с:",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2021-12-02"
+                    },
+                    "dateEnd": {
+                        "title": "Фильтр по дате",
+                        "description": "Фильтрация по дате, ДО введеной даты:",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2021-12-02"
                     }
                 },
                 "type": "object"
@@ -500,7 +507,7 @@
                 "type": "object"
             },
             "Questions": {
-                "title": "Обращения",
+                "title": "Сущность обращения",
                 "description": "Модель обращении пользователей, структура и описание.",
                 "properties": {
                     "id": {

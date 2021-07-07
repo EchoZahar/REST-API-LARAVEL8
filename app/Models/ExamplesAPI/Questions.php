@@ -8,7 +8,7 @@ namespace App\Models\ExamplesAPI;
  * @package App\Models\ExamplesAPI
  *
  * @OA\Schema (
- *     title="Обращения",
+ *     title="Сущность обращения",
  *     description="Модель обращении пользователей, структура и описание.",
  *     @OA\Xml ( name="Question" )
  * )
