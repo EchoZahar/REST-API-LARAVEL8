@@ -270,6 +270,9 @@ class QuestionController extends ApiController
         }
         if (!$request->input('user_id')) {
             $data['user_id'] = auth()->user()->id;
+            if (!$data['user_id']) {
+                return response(['error' => "Forbidden"]);
+            }
         }
         $question->update($data);
         Mail::to($question->email)->send(new SendQuestionMail($question));
