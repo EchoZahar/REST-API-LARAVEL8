@@ -41,7 +41,7 @@ class QuestionObserver
 		$this->setComment($question);
 		$this->setUser($question);
 		$this->setStatus($question);
-		$this->setDateAnswer($question);
+        $this->setDateAnswer($question);
 		dispatch(new SendMailAnswer($question));
 		Log::info('Обновлено обращенее пользователя: ' . $question->name . ', администратором id:' . $question->user_id . '.');
 	}
@@ -76,14 +76,10 @@ class QuestionObserver
 		$question->status = $this->request->input('status');
 	}
 
-	/**
-	 * @param Question $question
-	 * Если есть комменатрии от администратора, то записываю время ответа.
-	 */
-	public function setDateAnswer(Question $question)
-	{
-		if (!$this->request->input('dateTime')) {
-			$question->dateTime = Carbon::now();
-		}
-	}
+	public function  setDateAnswer(Question $question)
+    {
+        if ($this->request->input('dateTime')) {
+            $question->dateTime = Carbon::now()->format('Y-m-d H:i:s');
+        }
+    }
 }
