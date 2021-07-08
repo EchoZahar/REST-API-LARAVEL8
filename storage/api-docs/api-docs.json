@@ -251,7 +251,7 @@
                     }
                 },
                 "responses": {
-                    "202": {
+                    "200": {
                         "description": "Запись успешно обновлена",
                         "content": {
                             "application/json": {
@@ -275,6 +275,9 @@
                     },
                     "419": {
                         "description": "Что то пошло не так!"
+                    },
+                    "422": {
+                        "description": "Что то пошло не так, проверте правильность введенных данных."
                     }
                 },
                 "security": [
@@ -502,6 +505,24 @@
                         "type": "integer",
                         "format": "integer",
                         "example": 1
+                    },
+                    "status": {
+                        "title": "Статус обращения",
+                        "description": "По умолчанию статус: active, если администратор ответил на обращение то статус измениться",
+                        "type": "string",
+                        "format": "string",
+                        "enum": [
+                            "active",
+                            "resolved"
+                        ],
+                        "example": "active, resolved"
+                    },
+                    "dateTime": {
+                        "title": "Дата ответа",
+                        "description": "Поля с датой ответа на обращение.",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2021-07-08 00:00:00"
                     }
                 },
                 "type": "object"
@@ -542,7 +563,7 @@
                         "format": "string",
                         "example": "Это пример текста обращения."
                     },
-                    "dateAction": {
+                    "dateTime": {
                         "title": "Дата ответа от админа",
                         "description": "Поле не обязательно для заполнения",
                         "format": "datetime",

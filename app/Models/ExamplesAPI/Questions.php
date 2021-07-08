@@ -80,7 +80,7 @@ class Questions
      *     example="2021-12-21 21:21:21"
      * )
      */
-    public $dateAction;
+    public $dateTime;
 
     /**
      * @var

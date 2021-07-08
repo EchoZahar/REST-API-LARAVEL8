@@ -34,4 +34,29 @@ class QuestionUpdateRequest
      * )
      */
     public $user_id;
+
+	/**
+	 * @var string
+	 *
+	 * @OA\Property(
+	 *      title="Статус обращения",
+	 *      description="По умолчанию статус: active, если администратор ответил на обращение то статус измениться",
+	 *      enum={"active", "resolved"},
+	 *      format="string",
+	 *      example="active, resolved"
+	 * )
+	 */
+    public $status;
+
+	/**
+	 * @var string
+	 *
+	 * @OA\Property(
+	 *      title="Дата ответа",
+	 *      description="Поля с датой ответа на обращение.",
+	 *      format="date",
+	 *      example="2021-07-08 00:00:00"
+	 * )
+	 */
+    public $dateTime;
 }
