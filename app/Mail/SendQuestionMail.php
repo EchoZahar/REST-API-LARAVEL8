@@ -3,8 +3,8 @@
 namespace App\Mail;
 
 use App\Models\Question;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
@@ -12,7 +12,7 @@ class SendQuestionMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $question;
+    private $question;
 
     /**
      * Create a new message instance.
@@ -38,7 +38,7 @@ class SendQuestionMail extends Mailable
                 'qName' => $this->question->name,
                 'qMessage' => $this->question->message,
                 'qComment' => $this->question->comment,
-                'qDateTime' => \Carbon\Carbon::parse($this->question->dateTime)->format('d.m.Y H:i'),
+                'qDateTime' => Carbon::parse($this->question->dateTime)->format('d.m.Y H:i'),
                 'qStatus' => $this->question->status,
             ]);
     }

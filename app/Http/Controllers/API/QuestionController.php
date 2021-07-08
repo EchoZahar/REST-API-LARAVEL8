@@ -5,13 +5,9 @@ namespace App\Http\Controllers\API;
 use App\Http\Requests\FilterRequest;
 use App\Http\Requests\QuestionStoreRequest;
 use App\Http\Requests\QuestionUpdateRequest;
-use App\Mail\NewQuestionMail;
-use App\Mail\SendQuestionMail;
 use App\Models\Question;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Mail;
 
 class QuestionController extends ApiController
 {
@@ -148,16 +144,8 @@ class QuestionController extends ApiController
      */
     public function store(QuestionStoreRequest $request)
     {
-        $data = $request->only('name', 'email', 'message');
-        $question = Question::create($data);
-        if (!$question) {
-            return response(['message' => 'что то пошло не так !'], 400);
-        }
-        /**
-         * Отправка email сообщения пользователю
-         */
-        Mail::to($question->email)->send(new NewQuestionMail($question));
-        return response($question, 200);
+        $question = Question::create($request->only('name', 'email', 'message'));
+        return response([$question, ['message' => 'Обращение добаавлено !']], 200);
     }
 
     /**
@@ -257,25 +245,10 @@ class QuestionController extends ApiController
      *      )
      * )
      */
-    public function update(QuestionUpdateRequest $request, $id)
+    public function update(QuestionUpdateRequest $request, int $id)
     {
-        $question = Question::find($id);
-        if (!$question) {
-            return response(['message' => 'не найдено !'], 404);
-        }
-        $data = $request->only('comment', 'user_id');
-        if ($data['comment'] != null) {
-            $data['status'] = Question::RESOLVED;
-            $question->dateTime = Carbon::now();
-        }
-        if (!$request->input('user_id')) {
-            $data['user_id'] = auth()->user()->id;
-            if (!$data['user_id']) {
-                return response(['error' => "Forbidden"]);
-            }
-        }
-        $question->update($data);
-        Mail::to($question->email)->send(new SendQuestionMail($question));
+        $question = Question::findOrFail($id);
+        $question->update($request->all());
         return [$question, ['message' => 'Запись успешно обновлена, email отправлен пользователю !']];
     }
 

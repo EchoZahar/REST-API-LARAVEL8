@@ -10,7 +10,7 @@ class Question extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['name', 'email', 'status', 'message', 'dateAction', 'comment', 'user_id'];
+    protected $fillable = ['name', 'email', 'status', 'message', 'dateTime', 'comment', 'user_id'];
 
     /**
      * использую в правилах валидаций
