@@ -108,8 +108,7 @@ class QuestionController extends ApiController
          * метод getQueryString() добавляет параметр в пагинацию
          * переход по страницам отфильтрованных данных
          */
-        $questions = $filter->latest()->simplePaginate(3)->withPath('?' . $request->getQueryString());
-        return $questions;
+        return $filter->latest()->simplePaginate(3)->withPath('?' . $request->getQueryString());
     }
 
     /**
@@ -178,7 +177,7 @@ class QuestionController extends ApiController
      *     )
      * )
      */
-    public function show($question_id)
+    public function show(int $question_id)
     {
         $question = Question::with('user')->find($question_id);
         if (!$question) {
@@ -219,7 +218,7 @@ class QuestionController extends ApiController
      *         @OA\JsonContent(ref="#/components/schemas/QuestionUpdateRequest")
      *     ),
      *     @OA\Response (
-     *         response=202,
+     *         response=200,
      *         description="Запись успешно обновлена",
      *         @OA\JsonContent(ref="#/components/schemas/Questions")
      *      ),
@@ -242,13 +241,17 @@ class QuestionController extends ApiController
      *      @OA\Response (
      *         response=419,
      *         description="Что то пошло не так!"
+     *      ),
+     *     @OA\Response (
+     *         response=422,
+     *         description="Что то пошло не так, проверте правильность введенных данных."
      *      )
      * )
      */
     public function update(QuestionUpdateRequest $request, int $id)
     {
-        $question = Question::findOrFail($id);
-        $question->update($request->all());
+        $question = Question::find($id);
+        $question->update($request->only('comment','user_id','dateTime','status'));
         return [$question, ['message' => 'Запись успешно обновлена, email отправлен пользователю !']];
     }
 
@@ -292,7 +295,7 @@ class QuestionController extends ApiController
      *     )
      * )
      */
-    public function destroy($id)
+    public function destroy(int $id)
     {
         $question = Question::find($id);
         if (!$question) {

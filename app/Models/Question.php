@@ -12,9 +12,6 @@ class Question extends Model
 
     protected $fillable = ['name', 'email', 'status', 'message', 'dateTime', 'comment', 'user_id'];
 
-    /**
-     * использую в правилах валидаций
-     */
     const ACTIVE = 'active';
     const RESOLVED = 'resolved';
     public static $types = [self::ACTIVE, self::RESOLVED];

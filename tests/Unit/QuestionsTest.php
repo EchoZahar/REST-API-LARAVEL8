@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use Carbon\Carbon;
 use Tests\TestCase;
 
 class QuestionsTest extends TestCase
@@ -20,9 +21,15 @@ class QuestionsTest extends TestCase
     public function testQuestionCreate()
     {
         $response = $this->post('/api/questions/store', [
+<<<<<<< HEAD
             'name' => 'customer',
             'email' => 'admin@example.com',
             'message' => 'some questions for customer'
+=======
+            'name'      => 'unit test',
+            'email'     => 'admin@example.com',
+            'message'   => 'unit test successfully'
+>>>>>>> fd342652e722aedcb083799516e6e24392f4904c
         ]);
         $response->assertSuccessful();
     }
@@ -42,9 +49,13 @@ class QuestionsTest extends TestCase
     public function testQuestionsUpdate()
     {
         $response = $this->put('/api/questions/update/1', [
-            'comment' => 'answer for admin',
-            'user_id' => 1
+            'comment' => 'unit test update.',
+            'user_id' => 1,
+            'status'  => 'resolved',
+            'dateTime'=> Carbon::now()->format('Y-m-d H:i:s')
         ]);
+//        dd($response->status(), Carbon::now()->format('Y-m-d H:i:s'));
+//        dd($response->status());
         $response->assertSuccessful();
     }
 
@@ -56,7 +67,9 @@ class QuestionsTest extends TestCase
     {
         $response = $this->put('/api/questions/update/1', [
             'comment' => 'Какой то комментарии от администратора.',
-            'user_id' => ''
+            'user_id' => '',
+            'status'  => 'resolved',
+            'dateTime'=> Carbon::now()
         ]);
         $response->assertRedirect('/')->assertStatus(302);
     }
@@ -68,5 +81,6 @@ class QuestionsTest extends TestCase
     {
         $response = $this->delete('/api/questions/delete/1');
         $response->assertStatus(204);
+
     }
 }
