@@ -21,15 +21,10 @@ class QuestionsTest extends TestCase
     public function testQuestionCreate()
     {
         $response = $this->post('/api/questions/store', [
-<<<<<<< HEAD
-            'name' => 'customer',
-            'email' => 'admin@example.com',
-            'message' => 'some questions for customer'
-=======
             'name'      => 'unit test',
             'email'     => 'admin@example.com',
             'message'   => 'unit test successfully'
->>>>>>> fd342652e722aedcb083799516e6e24392f4904c
+
         ]);
         $response->assertSuccessful();
     }
@@ -54,8 +49,6 @@ class QuestionsTest extends TestCase
             'status'  => 'resolved',
             'dateTime'=> Carbon::now()->format('Y-m-d H:i:s')
         ]);
-//        dd($response->status(), Carbon::now()->format('Y-m-d H:i:s'));
-//        dd($response->status());
         $response->assertSuccessful();
     }
 
