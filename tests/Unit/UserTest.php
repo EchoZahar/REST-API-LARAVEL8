@@ -60,7 +60,6 @@ class UserTest extends TestCase
         ]);
         $this->assertEquals(201, $response->status());
         DB::table('users')->where('email', 'admin2@example.com')->delete();
-
     }
 
     /**

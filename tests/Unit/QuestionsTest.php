@@ -14,8 +14,6 @@ class QuestionsTest extends TestCase
     public function testQuestionsIndex()
     {
         $response = $this->get('/api/questions');
-//        dd($response->getContent());
-//        $response->assertStatus(200);
         $this->assertEquals(200, $response->status());
     }
 
