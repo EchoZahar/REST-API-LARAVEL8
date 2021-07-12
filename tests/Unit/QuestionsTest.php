@@ -22,9 +22,9 @@ class QuestionsTest extends TestCase
     public function testQuestionCreate()
     {
         $response = $this->post('/api/questions/store', [
-            'name'      => 'customer',
-            'email'     => 'admin@example.com',
-            'message'   => 'some questions for customer'
+            'name' => 'customer',
+            'email' => 'admin@example.com',
+            'message' => 'some questions for customer'
         ]);
         $response->assertSuccessful();
     }
@@ -64,7 +64,7 @@ class QuestionsTest extends TestCase
     }
 
     /**
-     * Удаление обращения по id
+     * Удаление обращения по id (deleted_at поле будет записана дата удаления)
      */
     public function testQuestionDelete()
     {

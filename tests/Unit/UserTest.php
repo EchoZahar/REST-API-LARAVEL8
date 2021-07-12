@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class UserTest extends TestCase
@@ -45,7 +46,9 @@ class UserTest extends TestCase
 
     /**
      * Регистрация нового пользователя
-     * Пользователь запищется в БД
+     * Пользователь записывается и удаляется из БД,
+     * можно закомментировать строку DB::table('users')->where('email', 'admin2@example.com')->delete();
+     * для проверки записи.
      */
     public function testNewRegisterUser()
     {
@@ -56,6 +59,8 @@ class UserTest extends TestCase
             'password_confirmation' => 'password'
         ]);
         $this->assertEquals(201, $response->status());
+        DB::table('users')->where('email', 'admin2@example.com')->delete();
+
     }
 
     /**
@@ -79,7 +84,7 @@ class UserTest extends TestCase
     {
         $response = $this->post('/api/register', [
             'name' => 'admin user #2',
-            'email' => 'admin2@example.com',
+            'email' => 'admin@example.com',
             'password' => 'password',
             'password_confirmation' => 'password'
         ]);
